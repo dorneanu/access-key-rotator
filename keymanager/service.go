@@ -3,7 +3,6 @@ package keymanager
 import (
 	"context"
 
-
 	"github.com/dorneanu/go-key-rotator/entity"
 )
 
@@ -12,4 +11,5 @@ type KeyManager interface {
 	ListAccessKeys(ctx context.Context) ([]entity.AccessKey, error)
 	CreateAccessKey(ctx context.Context) (entity.AccessKey, error)
 	DeleteAccessKey(ctx context.Context, id string) error
+	RotateAccessKey(ctx context.Context, id string) error
 }

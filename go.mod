@@ -13,6 +13,8 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/stretchr/testify v1.4.0
+	github.com/urfave/cli v1.22.5
+	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/vektra/mockery/v2 v2.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4 // indirect

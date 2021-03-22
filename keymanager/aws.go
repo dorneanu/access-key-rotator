@@ -2,6 +2,7 @@ package keymanager
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -77,6 +78,23 @@ func (m *AWSKeyManager) CreateAccessKey(ctx context.Context) (entity.AccessKey, 
 		ID:     *key.AccessKey.AccessKeyId,
 		Secret: *key.AccessKey.SecretAccessKey,
 	}, nil
+}
+
+// RotateAccessKey
+func (m *AWSKeyManager) RotateAccessKey(ctx context.Context, id string) error {
+	// First delete access key specified by id
+	err := m.DeleteAccessKey(ctx, id)
+	if err != nil {
+		return fmt.Errorf("Couldn't delete key (id = %s): %s", id, err)
+	}
+
+	// Create new one
+	_, err = m.CreateAccessKey(ctx)
+	if err != nil {
+		return fmt.Errorf("Couldn't create new key: %s", err)
+	}
+
+	return nil
 }
 
 // DeleteAccessKey

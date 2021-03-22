@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -14,15 +15,11 @@ import (
 func newKeyManager(cloudProvider string) km.KeyManager {
 	switch cloudProvider {
 	case "aws":
-		fmt.Println("it's aws")
-		manager := km.NewAWSKeyManager("test")
-		return manager
+		return km.NewAWSKeyManager("test")
 	case "gcp":
-		fmt.Println("it's google cloud")
-		return km.NewAWSKeyManager("test")
+		return km.NewGCPKeyManager()
 	case "azure":
-		fmt.Println("it's azure")
-		return km.NewAWSKeyManager("test")
+		return km.NewAzureKeyManager()
 	default:
 		panic("Unknown cloud provider")
 	}
@@ -66,7 +63,11 @@ func main() {
 				},
 				Usage: "List available access keys",
 				Action: func(c *cli.Context) error {
-					fmt.Println("added task: ", c.Args().First())
+					keyManager := newKeyManager(cloudProvider)
+					keys, _ := keyManager.ListAccessKeys(context.Background())
+					for _, k := range keys {
+						fmt.Printf("Id: %s\n", k.ID)
+					}
 					return nil
 				},
 			},

@@ -43,14 +43,16 @@ func (_m *SecretsStore) DeleteSecret(_a0 context.Context, _a1 entity.EncryptedKe
 }
 
 // EncryptKey provides a mock function with given fields: _a0, _a1
-func (_m *SecretsStore) EncryptKey(_a0 context.Context, _a1 entity.AccessKey) (entity.EncryptedKey, error) {
+func (_m *SecretsStore) EncryptKey(_a0 context.Context, _a1 entity.AccessKey) (*entity.EncryptedKey, error) {
 	ret := _m.Called(_a0, _a1)
 
-	var r0 entity.EncryptedKey
-	if rf, ok := ret.Get(0).(func(context.Context, entity.AccessKey) entity.EncryptedKey); ok {
+	var r0 *entity.EncryptedKey
+	if rf, ok := ret.Get(0).(func(context.Context, entity.AccessKey) *entity.EncryptedKey); ok {
 		r0 = rf(_a0, _a1)
 	} else {
-		r0 = ret.Get(0).(entity.EncryptedKey)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.EncryptedKey)
+		}
 	}
 
 	var r1 error

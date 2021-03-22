@@ -2,6 +2,7 @@ package keymanager
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/alecthomas/assert"
@@ -65,6 +66,7 @@ func TestAWSKeyManager_ListAccessKeys(t *testing.T) {
 	assert.Equal(t, keys, expected_keys)
 	mock_iam.AssertExpectations(t)
 }
+
 func TestAWSKeyManager_CreateAccessKey(t *testing.T) {
 	mock_iam := mocks.IAMAPI{}
 
@@ -96,6 +98,92 @@ func TestAWSKeyManager_CreateAccessKey(t *testing.T) {
 	assert.Equal(t, expected_key, key)
 	mock_iam.AssertExpectations(t)
 }
+
+func TestAWSKeyManager_RotateAccessKey(t *testing.T) {
+	// Setup
+	access_key := &iam.CreateAccessKeyOutput{
+		AccessKey: &types.AccessKey{
+			AccessKeyId:     aws.String("SECRET"),
+			SecretAccessKey: aws.String("SECRET VALUE"),
+		},
+	}
+
+	t.Run("RotateAccessKey without errors", func(t *testing.T) {
+		mock_iam := mocks.IAMAPI{}
+
+		// Create key manager
+		km := AWSKeyManager{
+			iam_user:   "test",
+			iam_client: &mock_iam,
+		}
+
+		mock_iam.On(
+			"CreateAccessKey",
+			mock.Anything,
+			mock.AnythingOfType("*iam.CreateAccessKeyInput"),
+			mock.Anything).Return(access_key, nil).Once()
+
+		mock_iam.On(
+			"DeleteAccessKey",
+			mock.Anything,
+			mock.AnythingOfType("*iam.DeleteAccessKeyInput"),
+			mock.Anything).Return(&iam.DeleteAccessKeyOutput{}, nil).Once()
+
+		err := km.RotateAccessKey(context.TODO(), "SECRET")
+		assert.Nil(t, err)
+	})
+
+	t.Run("RotateAccessKey access key not found", func(t *testing.T) {
+		mock_iam := mocks.IAMAPI{}
+
+		// Create key manager
+		km := AWSKeyManager{
+			iam_user:   "test",
+			iam_client: &mock_iam,
+		}
+
+		mock_iam.On(
+			"CreateAccessKey",
+			mock.Anything,
+			mock.AnythingOfType("*iam.CreateAccessKeyInput"),
+			mock.Anything).Return(access_key, nil).Once()
+
+		mock_iam.On(
+			"DeleteAccessKey",
+			mock.Anything,
+			mock.AnythingOfType("*iam.DeleteAccessKeyInput"),
+			mock.Anything).Return(&iam.DeleteAccessKeyOutput{}, errors.New("Key not found")).Once()
+
+		err := km.RotateAccessKey(context.TODO(), "SECRET")
+		assert.Error(t, err)
+	})
+
+	t.Run("RotateAccessKey can't create new key", func(t *testing.T) {
+		mock_iam := mocks.IAMAPI{}
+
+		// Create key manager
+		km := AWSKeyManager{
+			iam_user:   "test",
+			iam_client: &mock_iam,
+		}
+
+		mock_iam.On(
+			"CreateAccessKey",
+			mock.Anything,
+			mock.AnythingOfType("*iam.CreateAccessKeyInput"),
+			mock.Anything).Return(access_key, errors.New("Can't create new key")).Once()
+
+		mock_iam.On(
+			"DeleteAccessKey",
+			mock.Anything,
+			mock.AnythingOfType("*iam.DeleteAccessKeyInput"),
+			mock.Anything).Return(&iam.DeleteAccessKeyOutput{}, nil).Once()
+
+		err := km.RotateAccessKey(context.TODO(), "SECRET")
+		assert.Error(t, err)
+	})
+}
+
 func TestAWSKeyManager_DeleteAccessKey(t *testing.T) {
 	mock_iam := mocks.IAMAPI{}
 

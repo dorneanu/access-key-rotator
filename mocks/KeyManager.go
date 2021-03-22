@@ -36,13 +36,13 @@ func (_m *KeyManager) CreateAccessKey(ctx context.Context) (entity.AccessKey, er
 	return r0, r1
 }
 
-// DeleteAccessKey provides a mock function with given fields: ctx, key
-func (_m *KeyManager) DeleteAccessKey(ctx context.Context, key entity.AccessKey) error {
-	ret := _m.Called(ctx, key)
+// DeleteAccessKey provides a mock function with given fields: ctx, id
+func (_m *KeyManager) DeleteAccessKey(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.AccessKey) error); ok {
-		r0 = rf(ctx, key)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -71,4 +71,18 @@ func (_m *KeyManager) ListAccessKeys(ctx context.Context) ([]entity.AccessKey, e
 	}
 
 	return r0, r1
+}
+
+// RotateAccessKey provides a mock function with given fields: ctx, id
+func (_m *KeyManager) RotateAccessKey(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
