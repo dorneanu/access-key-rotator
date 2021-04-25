@@ -1,0 +1,19 @@
+* v0.1
+** CLI
+*** DONE Implement commands and subcommands in a cleaner way ([[https://github.com/urfave/cli/issues/585][example]])
+CLOSED: [2021-04-25 Sun 11:51]
+** Deployment
+*** AWS
+**** TODO Add CDK template
+**** TODO Add Lambdas
+** KeyManager
+*** TODO Implement Google Cloud
+*** TODO Implement Azure
+** SecretsStore
+*** TODO Implement Gitlab
+** ConfigStore
+*** TODO Implement Google Cloud Parameter Store
+*** TODO Implement Azure Key Vault Secrets
+* Backlog
+** TODO Add documentation
+** TODO Add ARCHITECTURE.md
