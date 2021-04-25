@@ -4,9 +4,15 @@ import (
 	"context"
 
 	"github.com/dorneanu/go-key-rotator/entity"
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v34/github"
 	"golang.org/x/crypto/nacl/box"
+	"golang.org/x/oauth2"
 )
+
+// GithubClient implements GithubSecretsService
+type GithubClient struct {
+	client *github.Client
+}
 
 // GithubSecretsService
 type GithubSecretsService interface {
@@ -23,9 +29,11 @@ type GithubSecretsStore struct {
 	secretsClient GithubSecretsService
 }
 
-func NewGithubSecretsStore(secretsService GithubSecretsService) *GithubSecretsStore {
+func NewGithubSecretsStore(secretsService GithubSecretsService, repoOwner, repoName string) *GithubSecretsStore {
 	return &GithubSecretsStore{
 		secretsClient: secretsService,
+		repo_owner:    repoOwner,
+		repo_name:     repoName,
 	}
 }
 
@@ -89,4 +97,16 @@ func (s *GithubSecretsStore) EncryptKey(ctx context.Context, k entity.AccessKey)
 		ID:     k.ID,
 		Secret: box,
 	}, nil
+}
+
+// NewGithubClient returns an implementation of GithubSecretsService
+// TODO: Also support authentication via Github Applications
+func NewGithubClient(accessToken string) GithubSecretsService {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: accessToken},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+	return client.Actions
 }

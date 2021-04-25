@@ -12,14 +12,15 @@ import (
 )
 
 func TestRotate(t *testing.T) {
-
 	t.Run("Check for errors", func(t *testing.T) {
 		mock_key_manager := &mocks.KeyManager{}
 		mock_secrets_store := &mocks.SecretsStore{}
+		mock_config_store := &mocks.ConfigStore{}
 
 		app := &AccessKeyRotatorApp{
 			KeyManager:   mock_key_manager,
 			SecretsStore: mock_secrets_store,
+			ConfigStore:  mock_config_store,
 		}
 		mock_key_manager.On(
 			"RotateAccessKey",
@@ -34,11 +35,14 @@ func TestRotate(t *testing.T) {
 	t.Run("Check for empty access key id", func(t *testing.T) {
 		mock_key_manager := &mocks.KeyManager{}
 		mock_secrets_store := &mocks.SecretsStore{}
+		mock_config_store := &mocks.ConfigStore{}
 
 		app := &AccessKeyRotatorApp{
 			KeyManager:   mock_key_manager,
 			SecretsStore: mock_secrets_store,
+			ConfigStore:  mock_config_store,
 		}
+
 		mock_key_manager.On(
 			"RotateAccessKey",
 			mock.Anything,
@@ -52,11 +56,14 @@ func TestRotate(t *testing.T) {
 	t.Run("Check for RotateAccessKey error", func(t *testing.T) {
 		mock_key_manager := &mocks.KeyManager{}
 		mock_secrets_store := &mocks.SecretsStore{}
+		mock_config_store := &mocks.ConfigStore{}
 
 		app := &AccessKeyRotatorApp{
 			KeyManager:   mock_key_manager,
 			SecretsStore: mock_secrets_store,
+			ConfigStore:  mock_config_store,
 		}
+
 		mock_key_manager.On(
 			"RotateAccessKey",
 			mock.Anything,
@@ -71,11 +78,14 @@ func TestListKeys(t *testing.T) {
 	t.Run("ListKeys non empty", func(t *testing.T) {
 		mock_key_manager := &mocks.KeyManager{}
 		mock_secrets_store := &mocks.SecretsStore{}
+		mock_config_store := &mocks.ConfigStore{}
 
 		app := &AccessKeyRotatorApp{
 			KeyManager:   mock_key_manager,
 			SecretsStore: mock_secrets_store,
+			ConfigStore:  mock_config_store,
 		}
+
 		mock_key_manager.On(
 			"ListAccessKeys",
 			mock.Anything).Return([]entity.AccessKey{
@@ -91,11 +101,14 @@ func TestListKeys(t *testing.T) {
 	t.Run("ListKeys on error", func(t *testing.T) {
 		mock_key_manager := &mocks.KeyManager{}
 		mock_secrets_store := &mocks.SecretsStore{}
+		mock_config_store := &mocks.ConfigStore{}
 
 		app := &AccessKeyRotatorApp{
 			KeyManager:   mock_key_manager,
 			SecretsStore: mock_secrets_store,
+			ConfigStore:  mock_config_store,
 		}
+
 		mock_key_manager.On(
 			"ListAccessKeys",
 			mock.Anything).Return([]entity.AccessKey{}, errors.New("SOME ERROR")).Once()
@@ -104,4 +117,18 @@ func TestListKeys(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+}
+
+func TestUploadSecrets(t *testing.T) {
+	mock_key_manager := &mocks.KeyManager{}
+	mock_secrets_store := &mocks.SecretsStore{}
+	mock_config_store := &mocks.ConfigStore{}
+
+	app := &AccessKeyRotatorApp{
+		KeyManager:   mock_key_manager,
+		SecretsStore: mock_secrets_store,
+		ConfigStore:  mock_config_store,
+	}
+	err := app.UploadSecrets(context.TODO())
+	assert.Nil(t, err)
 }
