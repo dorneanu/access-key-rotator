@@ -8,55 +8,50 @@ import (
 	"time"
 
 	"github.com/dorneanu/go-key-rotator/app"
-	km "github.com/dorneanu/go-key-rotator/keymanager"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var (
 	cloudProvider string
+	secretsStore  string
 	iamUser       string
 	accessKeyID   string
 	repoOwner     string
 	repoName      string
+	tokenPath     string
+	secretName    string
 )
 
-// newKeyManager returns a new KeyManager based on specified cloud provider
-func newKeyManager(cloudProvider string) km.KeyManager {
-	switch cloudProvider {
-	case "aws":
-		return km.NewAWSKeyManager(iamUser)
-	case "gcp":
-		return km.NewGCPKeyManager()
-	case "azure":
-		return km.NewAzureKeyManager()
-	default:
-		panic("Unknown cloud provider")
-	}
-}
-
 func main() {
-
 	globalFlags := []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "cp",
 			Usage:       "Specify cloud provider: aws, gcp, azure",
 			Required:    true,
 			Destination: &cloudProvider,
+			EnvVars:     []string{"CLOUD_PROVIDER"},
+		},
+		&cli.StringFlag{
+			Name:        "secrets-store",
+			Required:    true,
+			Usage:       "Which secrets store should be used (github, gitlab)",
+			Destination: &secretsStore,
+			EnvVars:     []string{"SECRETS_STORE"},
 		},
 	}
 
 	// Create new cli app
 	app := &cli.App{
 		// Flags: globalFlags,
-		Authors: []cli.Author{
-			cli.Author{
+		Authors: []*cli.Author{
+			&cli.Author{
 				Name:  "Victor Dorneanu",
 				Email: "some e-mail",
 			},
 		},
 		Version:  "v0.1",
 		Compiled: time.Now(),
-		Commands: []cli.Command{
+		Commands: []*cli.Command{
 			{
 				// list sub-command
 				Name:    "list",
@@ -66,6 +61,7 @@ func main() {
 						Name:        "iam-user",
 						Usage:       "Name of the IAM user",
 						Destination: &iamUser,
+						EnvVars:     []string{"IAM_USER"},
 					},
 				}, globalFlags...),
 				Usage: "List available access keys",
@@ -80,7 +76,6 @@ func main() {
 					if err != nil {
 						return err
 					}
-
 					// Print keys
 					for _, k := range keys {
 						fmt.Printf("Id: %s\n", k.ID)
@@ -97,6 +92,7 @@ func main() {
 						Name:        "iam-user",
 						Usage:       "Name of the IAM user",
 						Destination: &iamUser,
+						EnvVars:     []string{"IAM_USER"},
 					},
 					&cli.StringFlag{
 						Name:        "access-key-id",
@@ -125,6 +121,7 @@ func main() {
 						Name:        "iam-user",
 						Usage:       "Name of the IAM user",
 						Destination: &iamUser,
+						EnvVars:     []string{"IAM_USER"},
 					},
 					&cli.StringFlag{
 						Name:        "access-key-id",
@@ -135,20 +132,38 @@ func main() {
 						Name:        "repo-owner",
 						Usage:       "Repository owner",
 						Destination: &repoOwner,
+						EnvVars:     []string{"REPO_OWNER"},
 					},
 					&cli.StringFlag{
 						Name:        "repo-name",
 						Usage:       "Repository name",
 						Destination: &repoName,
+						EnvVars:     []string{"REPO_NAME"},
+					},
+					&cli.StringFlag{
+						Name:        "token-path",
+						Usage:       "Token path in the config store",
+						Destination: &tokenPath,
+						EnvVars:     []string{"TOKEN_CONFIG_STORE_PATH"},
+					},
+					&cli.StringFlag{
+						Name:        "secret-name",
+						Usage:       "Name of the secret to be created/updated",
+						Destination: &secretName,
+						EnvVars:     []string{"SECRET_NAME"},
 					},
 				}, globalFlags...),
 				Usage: "Upload access key to repo store",
 				Action: func(c *cli.Context) error {
 					rotatorApp := app.AccessKeyRotatorAppFactory(
 						app.AccessKeyRotatorSettings{
-							CloudProvider: cloudProvider,
-							IamUser:       iamUser,
-							SecretsStore:  "github",
+							CloudProvider:        cloudProvider,
+							SecretsStore:         secretsStore,
+							IamUser:              iamUser,
+							RepoOwner:            repoOwner,
+							RepoName:             repoName,
+							SecretName:           secretName,
+							ConfigStoreTokenPath: tokenPath,
 						})
 					err := rotatorApp.UploadSecrets(context.Background())
 					return err

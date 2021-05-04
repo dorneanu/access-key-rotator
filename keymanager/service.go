@@ -11,5 +11,5 @@ type KeyManager interface {
 	ListAccessKeys(ctx context.Context) ([]entity.AccessKey, error)
 	CreateAccessKey(ctx context.Context) (entity.AccessKey, error)
 	DeleteAccessKey(ctx context.Context, id string) error
-	RotateAccessKey(ctx context.Context, id string) error
+	RotateAccessKey(ctx context.Context, id string) (entity.AccessKey, error)
 }

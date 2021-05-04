@@ -25,6 +25,6 @@ func (f *GCPKeyManager) DeleteAccessKey(ctx context.Context, id string) error {
 	panic("not implemented") // TODO: Implement
 }
 
-func (f *GCPKeyManager) RotateAccessKey(ctx context.Context, id string) error {
+func (f *GCPKeyManager) RotateAccessKey(ctx context.Context, id string) (entity.AccessKey, error) {
 	panic("not implemented") // TODO: Implement
 }

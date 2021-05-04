@@ -9,24 +9,28 @@ import (
 	"github.com/dorneanu/go-key-rotator/entity"
 	k "github.com/dorneanu/go-key-rotator/keymanager"
 	s "github.com/dorneanu/go-key-rotator/secretsstore"
+	"github.com/kelseyhightower/envconfig"
 )
 
+// AccessKeyRotatorSettings holds settings for the rotator application
 type AccessKeyRotatorSettings struct {
-	CloudProvider string
-	IamUser       string
-	SecretsStore  string
-	RepoOwner     string
-	RepoName      string
+	CloudProvider        string `envconfig:"CLOUD_PROVIDER"`
+	IamUser              string `envconfig:"IAM_USER"`
+	SecretsStore         string `envconfig:"SECRETS_STORE"`
+	RepoOwner            string `envconfig:"REPO_OWNER"`
+	RepoName             string `envconfig:"REPO_NAME"`
+	SecretName           string `envconfig:"SECRET_NAME"`
+	ConfigStoreTokenPath string `envconfig:"TOKEN_CONFIG_STORE_PATH"`
 }
 
+// AccessKeyRotatorApp represents the application/business logic to be used in different contexts (CLI, Lambda etc.)
 type AccessKeyRotatorApp struct {
 	KeyManager   k.KeyManager
 	ConfigStore  c.ConfigStore
 	SecretsStore s.SecretsStore
 }
 
-// AccessKeyRotatorAppFactory will setup an AccessKeyRotatorApp depending on
-// the specified cloud provider
+// AccessKeyRotatorAppFactory will setup an AccessKeyRotatorApp depending on the specified cloud provider
 func AccessKeyRotatorAppFactory(settings AccessKeyRotatorSettings) *AccessKeyRotatorApp {
 	var keyManager k.KeyManager
 	var configStore c.ConfigStore
@@ -50,13 +54,21 @@ func AccessKeyRotatorAppFactory(settings AccessKeyRotatorSettings) *AccessKeyRot
 	// Setup secrets store
 	switch settings.SecretsStore {
 	case "github":
-		// TODO: Put string as ENV variable
-		accessToken, err := configStore.GetValue(context.Background(), "github-token")
+		privateKey, err := configStore.GetValue(context.Background(), settings.ConfigStoreTokenPath)
 		if err != nil {
-			log.Fatalf("Unable to get value from config store: %s", err)
+			log.Fatalf("Uable to get value from config store: %s", err)
 		}
-		githubSecretsClient := s.NewGithubClient(accessToken)
-		secretsStore = s.NewGithubSecretsStore(githubSecretsClient, settings.RepoOwner, settings.RepoName)
+
+		var githubSettings s.GithubAppSettings
+		err = envconfig.Process("", &githubSettings)
+		if err != nil {
+			log.Fatalf("Couldn't get ENV variables for github settings: %s", err)
+		}
+		githubSettings.PrivateKey = []byte(privateKey)
+
+		githubSecretsClient := s.NewGithubClientAsApp(githubSettings)
+		secretsStore = s.NewGithubSecretsStore(
+			githubSecretsClient, settings.RepoOwner, settings.RepoName, settings.SecretName)
 	default:
 		panic("Unknown secrets store")
 	}
@@ -82,7 +94,7 @@ func (a *AccessKeyRotatorApp) Rotate(ctx context.Context, access_key_id string) 
 		return fmt.Errorf("access_key_id is empty")
 	}
 
-	err := a.KeyManager.RotateAccessKey(ctx, access_key_id)
+	_, err := a.KeyManager.RotateAccessKey(ctx, access_key_id)
 	if err != nil {
 		return fmt.Errorf("Key rotation failed: %s", err)
 	}
@@ -102,17 +114,26 @@ func (a *AccessKeyRotatorApp) UploadSecrets(ctx context.Context) error {
 	// First get list of keys
 	keys, err := a.ListKeys(ctx)
 	if err != nil {
-		return fmt.Errorf("Couldn't upload secrets: %s", err)
+		return fmt.Errorf("Couldn't get list of keys: %s", err)
 	}
 
+	// Encrypt each key and upload to secrets store
 	for _, k := range keys {
-		fmt.Printf("%+v\n", k)
-		encryptedKey, err := a.SecretsStore.EncryptKey(ctx, k)
+		fmt.Printf("%v\n", k)
+		newKey, err := a.KeyManager.RotateAccessKey(ctx, k.ID)
+		if err != nil {
+			return fmt.Errorf("Couldn't rotate key: %s", err)
+		}
+
+		encryptedKey, err := a.SecretsStore.EncryptKey(ctx, newKey)
 		if err != nil {
 			return fmt.Errorf("Couldn't encrypt key: %s\n", err)
 		}
 
-		fmt.Printf("%+v\n", encryptedKey)
+		err = a.SecretsStore.CreateSecret(ctx, *encryptedKey)
+		if err != nil {
+			return fmt.Errorf("Couldn't upload secrets: %s", err)
+		}
 	}
 	return nil
 }

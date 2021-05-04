@@ -25,6 +25,6 @@ func (a *AzureKeyManager) DeleteAccessKey(ctx context.Context, id string) error 
 	panic("not implemented") // TODO: Implement
 }
 
-func (a *AzureKeyManager) RotateAccessKey(ctx context.Context, id string) error {
+func (a *AzureKeyManager) RotateAccessKey(ctx context.Context, id string) (entity.AccessKey, error) {
 	panic("not implemented") // TODO: Implement
 }

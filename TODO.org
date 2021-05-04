@@ -11,6 +11,7 @@
 ** SecretsStore
 - [ ] Implement Gitlab
 ** ConfigStore
+- [ ] Make sure to use SecretString
 - [ ] Implement Google Cloud Parameter Store
 - [ ] Implement Azure Key Vault Secrets
 * Backlog

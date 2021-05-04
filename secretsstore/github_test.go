@@ -20,8 +20,8 @@ func TestGithubSecretsStore_ListRepoSecrets(t *testing.T) {
 
 	// Create new secrets store
 	github_store := GithubSecretsStore{
-		repo_owner:    "dorneanu",
-		repo_name:     "test",
+		repoOwner:    "dorneanu",
+		repoName:     "test",
 		secretsClient: mock_secretsservice,
 	}
 
@@ -97,8 +97,8 @@ func TestGithubSecretsStore_CreateSecret(t *testing.T) {
 
 		// Create new secrets store
 		github_store := GithubSecretsStore{
-			repo_owner:    "dorneanu",
-			repo_name:     "test",
+			repoOwner:    "dorneanu",
+			repoName:     "test",
 			secretsClient: mock_secretsservice,
 		}
 
@@ -154,8 +154,8 @@ func TestGithubSecretsStore_DeleteSecret(t *testing.T) {
 
 	// Create new secrets store
 	github_store := GithubSecretsStore{
-		repo_owner:    "dorneanu",
-		repo_name:     "test",
+		repoOwner:    "dorneanu",
+		repoName:     "test",
 		secretsClient: mock_secretsservice,
 	}
 	encrypted_key := entity.EncryptedKey{

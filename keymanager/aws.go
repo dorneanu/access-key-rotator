@@ -81,20 +81,19 @@ func (m *AWSKeyManager) CreateAccessKey(ctx context.Context) (entity.AccessKey, 
 }
 
 // RotateAccessKey
-func (m *AWSKeyManager) RotateAccessKey(ctx context.Context, id string) error {
+func (m *AWSKeyManager) RotateAccessKey(ctx context.Context, id string) (entity.AccessKey, error) {
 	// First delete access key specified by id
 	err := m.DeleteAccessKey(ctx, id)
 	if err != nil {
-		return fmt.Errorf("Couldn't delete key (id = %s): %s", id, err)
+		return entity.AccessKey{}, fmt.Errorf("Couldn't delete key (id = %s): %s", id, err)
 	}
 
 	// Create new one
-	_, err = m.CreateAccessKey(ctx)
+	newKey, err := m.CreateAccessKey(ctx)
 	if err != nil {
-		return fmt.Errorf("Couldn't create new key: %s", err)
+		return entity.AccessKey{}, fmt.Errorf("Couldn't create new key: %s", err)
 	}
-
-	return nil
+	return newKey, nil
 }
 
 // DeleteAccessKey

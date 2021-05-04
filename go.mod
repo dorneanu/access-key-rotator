@@ -7,6 +7,7 @@ require (
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
 	github.com/alecthomas/colour v0.1.0 // indirect
 	github.com/alecthomas/repr v0.0.0-20210301060118-828286944d6a // indirect
+	github.com/aws/aws-lambda-go v1.23.0 // indirect
 	github.com/aws/aws-sdk-go v1.38.9
 	github.com/aws/aws-sdk-go-v2 v1.3.0
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
@@ -14,6 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.2.0
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/boombuler/barcode v1.0.1 // indirect
+	github.com/bradleyfalzon/ghinstallation v1.1.1 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/google/go-github/v33 v33.0.0
@@ -29,7 +31,7 @@ require (
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3 // indirect
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli v1.22.5
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/vektra/mockery/v2 v2.6.0 // indirect
