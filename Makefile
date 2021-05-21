@@ -1,10 +1,14 @@
 # Configuration
 GO111MODULES=on
+BUILD_FLAGS="-ldflags=-s -w"
+
 MAIN_BINARY=access-key-rotator
 MAIN_LAMBDA=access-key-rotator.lambda
 LAMBDA_NAME=AccessKeyRotator
+
 SRC_FILES=cmd/access-key-rotator/main.go
 SRC_FILES_LAMBDA=cmd/lambda/access-key-rotator.go
+
 DIST_DIR=./build
 
 zip: build-lambda # Make zip for AWS lambda deployment
@@ -14,6 +18,6 @@ build-cli: # Build CLI binary
 	go build -o ${DIST_DIR}/${MAIN_BINARY} ${SRC_FILES}
 
 build-lambda: # Build Lambda
-	go build -o ${DIST_DIR}/${MAIN_LAMBDA} ${SRC_FILES_LAMBDA}
+	CGO_ENABLED=0 go build ${BUILD_FLAGS} -o ${DIST_DIR}/${MAIN_LAMBDA} ${SRC_FILES_LAMBDA}
 
 all: build-cli

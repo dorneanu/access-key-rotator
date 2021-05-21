@@ -2,12 +2,15 @@
 ** CLI
 - [X] Implement commands and subcommands in a cleaner way ([[https://github.com/urfave/cli/issues/585][example]])
 ** Deployment
-*** AWS
-- [ ] Add CDK template
-- [ ] Add Lambdas
+*** WIP AWS
+- [-] Add CDK template
+  + [ ] Add permissions for IAM
+  + [X] Add permissions for SSM
+- [X] Add Lambdas
 ** KeyManager
 - [ ] Implement Google Cloud
 - [ ] Implement Azure
+
 ** SecretsStore
 - [ ] Implement Gitlab
 ** ConfigStore
@@ -17,3 +20,6 @@
 * Backlog
 - [ ] Add documentation
 - [ ] Add ARCHITECTURE.md
+- [ ] Add IAM role (to be assumed when doing sth with the access key)
+- [ ] Rotate for multiple IAM users
+- [ ] Make cron job expression configurable (via ENV variable)

@@ -119,7 +119,6 @@ func (a *AccessKeyRotatorApp) UploadSecrets(ctx context.Context) error {
 
 	// Encrypt each key and upload to secrets store
 	for _, k := range keys {
-		fmt.Printf("%v\n", k)
 		newKey, err := a.KeyManager.RotateAccessKey(ctx, k.ID)
 		if err != nil {
 			return fmt.Errorf("Couldn't rotate key: %s", err)
