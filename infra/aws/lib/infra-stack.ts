@@ -6,6 +6,7 @@ import targets = require('@aws-cdk/aws-events-targets');
 import assets = require("@aws-cdk/aws-s3-assets");
 import iam = require("@aws-cdk/aws-iam");
 import path = require("path");
+import { SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER } from 'constants';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -19,15 +20,15 @@ export class InfraStack extends cdk.Stack {
 
     // Define ENV variables
     var env = {
-        "CLOUD_PROVIDER": "aws",
-        "IAM_USER": "GithubIAMUser",
-        "SECRETS_STORE": "github",
-        "SECRET_NAME": "TESTING",
-        "REPO_OWNER": "dorneanu",
-        "REPO_NAME": "test",
-        "TOKEN_CONFIG_STORE_PATH": "github-token",
-        "GITHUB_APP_ID": "114149",
-        "GITHUB_INST_ID": "16758104",
+        "CLOUD_PROVIDER": this.node.tryGetContext("cloudProvider"),
+        "IAM_USER": this.node.tryGetContext("iamUser"),
+        "SECRETS_STORE": this.node.tryGetContext("secretsStore"),
+        "SECRET_NAME": this.node.tryGetContext("secretName"),
+        "REPO_OWNER": this.node.tryGetContext("repoOwner"),
+        "REPO_NAME": this.node.tryGetContext("repoName"),
+        "TOKEN_CONFIG_STORE_PATH": this.node.tryGetContext("ssmParam"),
+        "GITHUB_APP_ID": this.node.tryGetContext("githubAppID"),
+        "GITHUB_INST_ID": this.node.tryGetContext("githubInstID"),
     }
 
     // Create IAM role  to be assumed by the lambda
@@ -38,20 +39,22 @@ export class InfraStack extends cdk.Stack {
       
         
     // be able to get SSM parameters 
+    var ssmRessource = ['arn', 'aws', 'ssm', this.region, this.account, 'parameter/'+env.TOKEN_CONFIG_STORE_PATH].join(':'); 
     lambdaIAMRole.addToPolicy(new iam.PolicyStatement({
         actions: ['ssm:GetParameter'],
-        resources: ['arn:aws:ssm:eu-central-1:451556475769:parameter/github-token'],
+        resources: [ssmRessource],
     }));
 
     // be able to list, create, delete IAM access keys
+    var iamRessource = ['arn', 'aws', 'iam', '', this.account, 'user/'+env.IAM_USER].join(':'); 
     lambdaIAMRole.addToPolicy(new iam.PolicyStatement({
-        actions: ['IAM:ListAccessKeys', 'IAM:CreateAccessKey', 'IAM:DeleteAccessKey'],
-        resources: ['arn:aws:ssm:eu-central-1:451556475769:parameter/github-token'],
+        actions: ['iam:ListAccessKeys', 'iam:CreateAccessKey', 'iam:DeleteAccessKey'],
+        resources: [iamRessource],
     }));
 
     const handler = new lambda.Function(this, "AccessKeyRotatorLambda", {
         runtime: lambda.Runtime.GO_1_X,
-        handler: "access-key-rotator.lambda",
+        handler: "build/access-key-rotator.lambda",
         code: lambda.Code.fromBucket(
             asset.bucket,
             asset.s3ObjectKey
@@ -64,7 +67,7 @@ export class InfraStack extends cdk.Stack {
     const debugHandler = new lambda.Function(this, "DebugAccessKeyRotatorLambda", {
         runtime: lambda.Runtime.GO_1_X,
         handler: "access-key-rotator.lambda",
-        code: lambda.Code.fromAsset('../../build/'),
+        code: lambda.Code.fromAsset('../../build/AccessKeyRotator.zip'),
         environment: env,
         role: lambdaIAMRole 
     });
