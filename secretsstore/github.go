@@ -22,9 +22,9 @@ type GithubAppSettings struct {
 }
 
 // GithubClient implements GithubSecretsService
-type GithubClient struct {
-	client *github.Client
-}
+// type GithubClient struct {
+// 	client *github.Client
+// }
 
 // GithubSecretsService
 type GithubSecretsService interface {

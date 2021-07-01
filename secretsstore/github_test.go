@@ -9,7 +9,7 @@ import (
 	"github.com/alecthomas/assert"
 	"github.com/dorneanu/go-key-rotator/entity"
 	"github.com/dorneanu/go-key-rotator/mocks"
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v34/github"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/nacl/box"
 )
@@ -20,8 +20,8 @@ func TestGithubSecretsStore_ListRepoSecrets(t *testing.T) {
 
 	// Create new secrets store
 	github_store := GithubSecretsStore{
-		repoOwner:    "dorneanu",
-		repoName:     "test",
+		repoOwner:     "dorneanu",
+		repoName:      "test",
 		secretsClient: mock_secretsservice,
 	}
 
@@ -35,12 +35,12 @@ func TestGithubSecretsStore_ListRepoSecrets(t *testing.T) {
 		TotalCount: 2,
 		Secrets: []*github.Secret{
 			{Name: "A",
-				CreatedAt: github.Timestamp{time.Date(2019, time.January, 02, 15, 04, 05, 0, time.UTC)},
-				UpdatedAt: github.Timestamp{time.Date(2020, time.January, 02, 15, 04, 05, 0, time.UTC)},
+				CreatedAt: github.Timestamp{Time: time.Date(2019, time.January, 02, 15, 04, 05, 0, time.UTC)},
+				UpdatedAt: github.Timestamp{Time: time.Date(2020, time.January, 02, 15, 04, 05, 0, time.UTC)},
 			},
 			{Name: "B",
-				CreatedAt: github.Timestamp{time.Date(2019, time.January, 02, 15, 04, 05, 0, time.UTC)},
-				UpdatedAt: github.Timestamp{time.Date(2020, time.January, 02, 15, 04, 05, 0, time.UTC)},
+				CreatedAt: github.Timestamp{Time: time.Date(2019, time.January, 02, 15, 04, 05, 0, time.UTC)},
+				UpdatedAt: github.Timestamp{Time: time.Date(2020, time.January, 02, 15, 04, 05, 0, time.UTC)},
 			},
 		},
 	}
@@ -67,6 +67,19 @@ func TestGithubSecretsStore_CreateSecret(t *testing.T) {
 		// Create new secrets store
 		github_store := GithubSecretsStore{
 			secretsClient: mock_secretsservice,
+		}
+
+		// Create pub/priv key pair
+		public_key, _, _ := box.GenerateKey(rand.Reader)
+		assert.Equal(t, 32, len(public_key))
+
+		// Create public key
+		pk_id := "secret"
+		pk_secret := string(public_key[:])
+
+		github_store.repoPublicKey = &github.PublicKey{
+			KeyID: &pk_id,
+			Key: &pk_secret,
 		}
 
 		encrypted_secret := &github.EncryptedSecret{
@@ -97,8 +110,8 @@ func TestGithubSecretsStore_CreateSecret(t *testing.T) {
 
 		// Create new secrets store
 		github_store := GithubSecretsStore{
-			repoOwner:    "dorneanu",
-			repoName:     "test",
+			repoOwner:     "dorneanu",
+			repoName:      "test",
 			secretsClient: mock_secretsservice,
 		}
 
@@ -154,8 +167,8 @@ func TestGithubSecretsStore_DeleteSecret(t *testing.T) {
 
 	// Create new secrets store
 	github_store := GithubSecretsStore{
-		repoOwner:    "dorneanu",
-		repoName:     "test",
+		repoOwner:     "dorneanu",
+		repoName:      "test",
 		secretsClient: mock_secretsservice,
 	}
 	encrypted_key := entity.EncryptedKey{
