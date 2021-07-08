@@ -57,7 +57,9 @@ fmt: # Format source code
 
 lint: # Lint source files
 	@echo "> Linting source files"
-	${GOLINT} run ./...  test: # Run unit tests
+	${GOLINT} run ./...
+
+test: # Run unit tests
 	@echo "> Running unit tests"
 	$(GOTEST) ./...
 

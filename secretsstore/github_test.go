@@ -79,7 +79,7 @@ func TestGithubSecretsStore_CreateSecret(t *testing.T) {
 
 		github_store.repoPublicKey = &github.PublicKey{
 			KeyID: &pk_id,
-			Key: &pk_secret,
+			Key:   &pk_secret,
 		}
 
 		encrypted_secret := &github.EncryptedSecret{
