@@ -1,0 +1,8 @@
+# Documentation: https://golangci-lint.run/usage/configuration/
+run:
+  test: true
+  skip-dirs: 
+    - infra/
+    - tmp/
+    - mocks/
+  skip-dirs-use-default: true
