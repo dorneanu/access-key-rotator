@@ -129,7 +129,7 @@ func TestAWSKeyManager_RotateAccessKey(t *testing.T) {
 			mock.AnythingOfType("*iam.DeleteAccessKeyInput"),
 			mock.Anything).Return(&iam.DeleteAccessKeyOutput{}, nil).Once()
 
-		err := km.RotateAccessKey(context.TODO(), "SECRET")
+		_, err := km.RotateAccessKey(context.TODO(), "SECRET")
 		assert.Nil(t, err)
 	})
 
@@ -154,7 +154,7 @@ func TestAWSKeyManager_RotateAccessKey(t *testing.T) {
 			mock.AnythingOfType("*iam.DeleteAccessKeyInput"),
 			mock.Anything).Return(&iam.DeleteAccessKeyOutput{}, errors.New("Key not found")).Once()
 
-		err := km.RotateAccessKey(context.TODO(), "SECRET")
+		_, err := km.RotateAccessKey(context.TODO(), "SECRET")
 		assert.Error(t, err)
 	})
 
@@ -179,7 +179,7 @@ func TestAWSKeyManager_RotateAccessKey(t *testing.T) {
 			mock.AnythingOfType("*iam.DeleteAccessKeyInput"),
 			mock.Anything).Return(&iam.DeleteAccessKeyOutput{}, nil).Once()
 
-		err := km.RotateAccessKey(context.TODO(), "SECRET")
+		_, err := km.RotateAccessKey(context.TODO(), "SECRET")
 		assert.Error(t, err)
 	})
 }
